@@ -6,7 +6,7 @@
 SetPackageInfo( rec(
 
 PackageName := "SubgroupLattice",
-Subtitle    := "Subgroup Lattice using Francy - Framework for Interactive Discrete Mathematics",
+Subtitle    := "Subgroup Lattice using Francy.s",
 Version     := "0.1.0",
 Date        := "23/05/2017",
 
@@ -61,15 +61,14 @@ PackageDoc := rec(
 
 Dependencies := rec(
   GAP := ">=4.7",
-  NeededOtherPackages := [ [ "GAPDoc", ">= 1.5" ]
-                         , [ "francy", ">= 0.1.0" ] ],
+  NeededOtherPackages := [ [ "francy", ">= 0.5.6" ] ],
   SuggestedOtherPackages := [],
   ExternalConditions := []
 ),
 
 AvailabilityTest := function() return true; end,
 
-TestFile := "tst/testall.g",
+#TestFile := "tst/testall.g",
 
 Keywords := [ "Interactive", "Graphics", "Plot", "" ]
 

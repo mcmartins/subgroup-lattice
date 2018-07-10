@@ -7,7 +7,9 @@
 
 last := 0;    # to make GAP happy when this package is auto-loaded
 
-ReadPackage( "subgrouplattice", "gap/subgroup.g" );
+ReadPackage( "subgrouplattice", "gap/menus.gi" );
+ReadPackage( "subgrouplattice", "gap/subgroup.gd" );
+ReadPackage( "subgrouplattice", "gap/subgroup.gi" );
 
 #############################################################################
 ##
