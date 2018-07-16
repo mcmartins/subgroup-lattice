@@ -8,7 +8,7 @@ SetPackageInfo( rec(
 PackageName := "SubgroupLattice",
 Subtitle    := "Subgroup Lattice using Francy.s",
 Version     := "0.1.0",
-Date        := "23/05/2017",
+Date        := "10/07/2018",
 
 Persons := [
   rec( 
@@ -48,7 +48,7 @@ ArchiveURL      := Concatenation( ~.SourceRepository.URL,
 ArchiveFormats := ".tar.gz",
 
 AbstractHTML := 
-  "The <span class=\"pkgname\">SubgroupLattice</span> package allows to use graphics in GAP.",
+  "The <span class=\"pkgname\">SubgroupLattice</span> package provides an interface to interact with groups by displaying lattices.",
 
 PackageDoc := rec(
   BookName         := "SubgroupLattice",
@@ -68,8 +68,8 @@ Dependencies := rec(
 
 AvailabilityTest := function() return true; end,
 
-#TestFile := "tst/testall.g",
+TestFile := "tst/testall.g",
 
-Keywords := [ "Interactive", "Graphics", "Plot", "" ]
+Keywords := [ "Subgroup Lattice", "Interactive", "Graphics" ]
 
 ));

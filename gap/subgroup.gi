@@ -9,19 +9,19 @@
 ##  IsGraphicSubgroupLattice object. Calls DecideSubgroupLatticeType. See
 ##  there for details.
 ##
-InstallMethod( GraphicSubgroupLattice,
+InstallMethod(GraphicSubgroupLattice,
     "for a group, and a record",
     true,
-    [ IsGroup, IsRecord ],
+    [IsGroup, IsRecord],
     0,
 function(G, def)
-  local latticetype, graph, poset, l, str, vmath, v2, v1;
-  
-  latticetype := DecideSubgroupLatticeType(G);
+  local latticeType, graph, poset, cls, vmath, v2, v1, menu, m, knownArgs, cb;
+
+  latticeType := DecideSubgroupLatticeType(G);
   # we do some heuristics to avoid the trivial group:
   # if we know all levels, we probably can calc. Size, if we shall generate
   # a vertex for the trivial subgroup, we should also know Size!
-  if latticetype[1] or latticetype[4] then   
+  if latticeType.knowsLevels or latticeType.trivial then
     # no trivial case:
     if Size(G) = 1 then
       return Error( "<G> must be non-trivial" );
@@ -31,72 +31,69 @@ function(G, def)
   # create a new canvas
   poset := Canvas("GraphicSubgroupLattice");
   # and make it a GraphicSubgroupLattice
-  SetFilterObj( poset, IsGraphicSubgroupLattice );
+  SetFilterObj(poset, IsGraphicSubgroupLattice);
+  
+  poset!.latticeType := latticeType;
 
   if HasName(G) then
-    SetTitle(poset, Concatenation(Title(poset)," of ",Name(G)));
+    SetTitle(poset, Concatenation(Title(poset)," of ", Name(G)));
   elif HasIdGroup(G) then
-    SetTitle(poset, Concatenation(Title(poset)," of ",String(IdGroup(G))));
+    SetTitle(poset, Concatenation(Title(poset)," of ", String(IdGroup(G))));
   fi;
 
   if IsBound(def.width) then SetWidth(poset, def.width); fi;
   if IsBound(def.height) then SetHeight(poset, def.height); fi;
   if IsBound(def.title) then SetTitle(poset, def.title); fi;
-  
-  #poset!.group := G;
-  
-  # now the other filters, depending on type:
-  if latticetype[1] then
-    SetFilterObj(poset,KnowsAllLevels);
-  fi;
-  if latticetype[2] then
-    SetFilterObj(poset,HasseProperty);
-  fi;
-  if latticetype[3] then
-    SetFilterObj(poset,CanCompareSubgroups);
-  fi;
-  
-  # initialize some components:
-  #poset!.selector := false;
 
-  # set the limits:
-  #poset!.limits := rec(conjugates := 100);
-  
+  # now the other filters, depending on type:
+  if latticeType.knowsLevels then SetFilterObj(poset, KnowsAllLevels); fi;
+  if latticeType.hasse then SetFilterObj(poset, HasseProperty); fi;
+  if latticeType.canCompare then SetFilterObj(poset, CanCompareSubgroups); fi;
+
   if KnowsAllLevels(poset) then
-    # We know how many levels so we can show the user
-    Add(poset, FrancyMessage(FrancyMessageType.INFO, Concatenation("There are ", String(Length(DivisorsInt(Size(G)))), " levels in this Group.")));
+    # we know how many levels so we can show the user
+    Add(poset, FrancyMessage(Concatenation("There are ",
+      String(Length(DivisorsInt(Size(G)))), " levels in this Group.")));
   else
-    # We don't know how many levels so we try to comput them
-    if latticetype[4] then
+    # we don't know how many levels so we try to compute them
+    if latticeType.trivial then
       if CanComputeSize(G) and Size(G) <> infinity then
-        Add(poset, FrancyMessage(FrancyMessageType.INFO, Concatenation("There are ", String(Size(G)), " levels in this Group.")));
+        Add(poset, FrancyMessage(Concatenation("There are ", String(Size(G)), " levels in this Group.")));
       else
-        Add(poset, FrancyMessage(FrancyMessageType.INFO, "We don't know how many levels there are on this group."));
+        Add(poset, FrancyMessage("We don't know how many levels there are on this group."));
       fi;
+    else
+      # we really don't know
+      Add(poset, FrancyMessage("We don't know how many levels there are on this group."));
     fi;
   fi;
-  
+
   # create an undirected graph to represent the poset
-  # by adding layers later, the undirected graph turns into an Hasse diagram
-  graph := Graph(GraphType.UNDIRECTED); Add(poset, graph);
+  # by adding layers later, the undirected graph turns
+  # into an Hasse diagram
+  graph := Graph(GraphType.UNDIRECTED);
+  Add(poset, graph);
   
+  cls:=ConjugacyClassesSubgroups(G);
+
   # create one or two initial vertices (G itself and trivial subgroup):
   # we seperate the mathematical data and the graphical data:
   vmath := rec(group := G, info := rec(Index := 1, IsNormal := true));
   vmath.class := [vmath];
   v2 := Shape(ShapeType.DIAMOND, "G");
   SetLayer(v2, 1);
-  #v2!.vmath := vmath;
-  #poset!.WholeGroupVert := v2;
-  
-  # we keep track of largest label:
-  #poset!.largestlabel := 1;
-  # we keep track of largest number of infinity label
-  #poset!.largestinflevel := 0;
-  
+  SetId(v2, String(Representative(cls[Length(cls)])));
+  for m in latticeType.contextMenus do
+    knownArgs := [poset, Representative(cls[Length(cls)])];
+    if m.group = true then
+      Add(knownArgs, G);
+    fi;
+    cb := Callback(m.func, knownArgs);
+    Add(v2, Menu(m.name, cb));
+  od;
   Add(graph, v2);
-  
-  if latticetype[4] then
+
+  if latticeType.trivial then
     vmath := rec(group := TrivialSubgroup(G));
     if CanComputeSize(G) then
       vmath.info := rec(Index := Size(G));
@@ -111,30 +108,37 @@ function(G, def)
       v1 := Shape(ShapeType.DIAMOND, "1");
       SetLayer(v1, -1);
     fi;
+    SetId(v1, String(Representative(cls[1])));
+    for m in latticeType.contextMenus do
+      knownArgs := [poset, Representative(cls[1])];
+      if m.group = true then
+        Add(knownArgs, G);
+      fi;
+      cb := Callback(m.func, knownArgs);
+      Add(v1, Menu(m.name, cb));
+    od;
     Add(graph, v1);
     
     # connect the two vertices
-    Add(graph, Link(v1,v2));
-    #poset!.TrivialGroupVert := v1;
-  else
-    #poset!.TrivialGroupVert := false;
+    Add(graph, Link(v1, v2));
   fi;
-  
+
   # <G> is selected at first
   v2!.selected := true;
-  
+
   # create menus:
-  #GGLMakeSubgroupsMenu(poset,latticetype[5]);
-  #poset!.menuoperations := latticetype[5];
-  
-  # Install the info method:
-  #poset!.infodisplays := latticetype[6];
-  #InstallPopup(poset,GGLRightClickPopup);
-  
-  # no vertex is green right now:
-  poset!.lastresult := [];
-         
-  return poset;
+  menu := Menu("Subgroup Lattice");
+  for m in latticeType.menus do
+    knownArgs := [poset];
+    if m.group = true then
+      Add(knownArgs, G);
+    fi;
+    cb := Callback(m.func, knownArgs);
+    Add(menu, Menu(m.name, cb));
+  od;
+  Add(poset, menu);
+
+  return Draw(poset);
 end);
 
 ##
@@ -143,10 +147,10 @@ end);
 InstallOtherMethod(GraphicSubgroupLattice,
     "for a group",
     true,
-    [ IsGroup ],
+    [IsGroup],
     0,
 function(G)
-  return GraphicSubgroupLattice(G,rec());
+  return GraphicSubgroupLattice(G, rec());
 end);
 
 #############################################################################
@@ -169,48 +173,58 @@ end);
 ##   4) Shall we create a vertex for the trivial subgroup at the beginning?
 ##   5) What menu operations are possible?
 ##   6) What information is displayed on RightClick?
-##  Returns a list. The first four entries are boolean values for  questions
+##  Returns a record. The first four entries are boolean values for  questions
 ##  1-4. Note that if the answer to 2 is true, then the answer to 3 must also
-##  be true. The fifth and sixth entry are configuration lists as explained 
+##  be true. The fifth and sixth entry are configuration lists as explained
 ##  in the configuration section of "ilatgrp.gi" for menu operations and
 ##  info displays respectively.
 ##
 ##  The following is the default "fallback" method suitable for reasonably
 ##  small finite groups.
 ##
-InstallMethod( DecideSubgroupLatticeType,
+InstallMethod(DecideSubgroupLatticeType,
     "for a group",
     true,
-    [ IsGroup ],
+    [IsGroup],
     0,
-function( G )
-  local knowslevels;
+function(G)
+  local knowslevels, menus;
+  menus:=[];
+  Append(menus, MenuOpsForFiniteGroups);
+  Append(menus, MenuOpsCommon);
   if Size(G) > 10^17 then # that is just heuristic!
     knowslevels := false;
   else
     knowslevels := Length(DivisorsInt(Size(G))) < 50;
   fi;
-  return [knowslevels,
-          true,         # we assume HasseProperty
-          true,         # we assume we can compare groups
-          true,         # we want the trivial subgroup
-          MenuOpsForFiniteGroups,
-          InfoDisplaysForFiniteGroups];
+  return rec(
+    knowsLevels  := knowslevels,
+    hasse        := true, # we assume HasseProperty
+    canCompare   := true, # we assume we can compare groups
+    trivial      := true, # we want the trivial subgroup
+    menus        := menus,
+    contextMenus := ContextMenusForFiniteGroups,
+  );
 end);
 
 ## for finitely presented groups:
-InstallMethod( DecideSubgroupLatticeType,
+InstallMethod(DecideSubgroupLatticeType,
     "for a group",
     true,
-    [ IsGroup and IsFpGroup ],
+    [IsGroup and IsFpGroup],
     0,
-        
-function( G )
-  return [false,        # we create levels dynamically
-          false,        # we do not assume HasseProperty
-          false,        # we assume we cannot compare groups efficiently
-          false,        # we don't want the trivial subgroup
-          MenuOpsForFpGroups,
-          InfoDisplaysForFpGroups];
-end);
 
+function(G)
+  local menus;
+  menus:=[];
+  Append(menus, MenuOpsForFpGroups);
+  Append(menus, MenuOpsCommon);
+  return rec(
+    knowsLevels  := false, # we create levels dynamically
+    hasse        := false, # we assume HasseProperty
+    canCompare   := false, # we assume we can compare groups
+    trivial      := false, # we want the trivial subgroup
+    menus        := menus,
+    contextMenus := ContextMenusForFpGroups,
+  );
+end);
