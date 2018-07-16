@@ -23,24 +23,24 @@ BindGlobal( "MenuOpsForFiniteGroups",
             for i in [1..Length(cls)] do
               nodes[i] := [];
               for j in [1..len[i]] do
-                  if len[i]=1 then
-                      nodes[i][j] := Shape(ShapeType.DIAMOND, String(i));
-                  else
-                      nodes[i][j] := Shape(ShapeType.CIRCLE, String(i));
+                if len[i]=1 then
+                    nodes[i][j] := Shape(ShapeType.DIAMOND, String(i));
+                else
+                    nodes[i][j] := Shape(ShapeType.CIRCLE, String(i));
+                fi;
+                SetLayer(nodes[i][j], -Size(Representative(cls[i])));
+                for m in poset!.latticeType.contextMenus do
+                  knownArgs := [poset, Representative(cls[i])];
+                  if m.group = true then
+                    Add(knownArgs, G);
                   fi;
-                  SetLayer(nodes[i][j], -Size(Representative(cls[i])));
-                  for m in poset!.latticeType.contextMenus do
-                    knownArgs := [poset, Representative(cls[i])];
-                    if m.group = true then
-                      Add(knownArgs, G);
-                    fi;
-                    cb := Callback(m.func, knownArgs);
-                    Add(nodes[i][j], Menu(m.name, cb));
-                  od;
-                  if i = Length(cls) and j = len[i] then
-                    SetTitle(nodes[i][j], "G"); # set G
-                  fi;
-                  Add(graphHasse, nodes[i][j]);
+                  cb := Callback(m.func, knownArgs);
+                  Add(nodes[i][j], Menu(m.name, cb));
+                od;
+                if i = Length(cls) and j = len[i] then
+                  SetTitle(nodes[i][j], "G"); # set G
+                fi;
+                Add(graphHasse, nodes[i][j]);
               od;
             od;
             # uniform layers hack
@@ -68,7 +68,7 @@ BindGlobal( "MenuOpsForFiniteGroups",
                     z:=cls[j[1]]!.normalizerTransversal[j[2]]*t;
                     z:=PositionCanonical(cls[j[1]]!.normalizerTransversal,z);
                   fi;
-                  Add(graphHasse, Link(nodes[i][k],nodes[j[1]][z]));
+                  Add(graphHasse, Link(nodes[j[1]][z], nodes[i][k]));
                 od;
               od;
             od;

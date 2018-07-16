@@ -71,7 +71,7 @@ function(G, def)
   # create an undirected graph to represent the poset
   # by adding layers later, the undirected graph turns
   # into an Hasse diagram
-  graph := Graph(GraphType.UNDIRECTED);
+  graph := Graph(GraphType.DIRECTED);
   Add(poset, graph);
   
   cls:=ConjugacyClassesSubgroups(G);
