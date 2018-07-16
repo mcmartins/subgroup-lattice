@@ -8,69 +8,70 @@ BindGlobal( "MenuOpsForFiniteGroups",
             len:=[];
             sz:=[];
             for i in cls do
-                Add(len,Size(i));
-                AddSet(sz,Size(Representative(i)));
+              Add(len,Size(i));
+              AddSet(sz,Size(Representative(i)));
             od;
             
             graphHasse := poset!.graph;
+            graphHasse!.nodes := rec(); # initialize nodes
+            graphHasse!.links := rec(); # initialize links
 
             nodes := [];
             sz:=Reversed(sz);
 
             # subgroup nodes, also acccording to size
             for i in [1..Length(cls)] do
-                nodes[i] := [];
-                for j in [1..len[i]] do
-                    if len[i]=1 then
-                        nodes[i][j] := Shape(ShapeType.DIAMOND, String(i));
-                    else
-                        nodes[i][j] := Shape(ShapeType.CIRCLE, String(i));
+              nodes[i] := [];
+              for j in [1..len[i]] do
+                  if len[i]=1 then
+                      nodes[i][j] := Shape(ShapeType.DIAMOND, String(i));
+                  else
+                      nodes[i][j] := Shape(ShapeType.CIRCLE, String(i));
+                  fi;
+                  SetLayer(nodes[i][j], -Size(Representative(cls[i])));
+                  for m in poset!.latticeType.contextMenus do
+                    knownArgs := [poset, Representative(cls[i])];
+                    if m.group = true then
+                      Add(knownArgs, G);
                     fi;
-                    SetLayer(nodes[i][j], -Size(Representative(cls[i])));
-                    SetId(nodes[i][j], String(Representative(cls[i])));
-                      for m in poset!.latticeType.contextMenus do
-                        knownArgs := [poset, Representative(cls[i])];
-                        if m.group = true then
-                          Add(knownArgs, G);
-                        fi;
-                        cb := Callback(m.func, knownArgs);
-                        Add(nodes[i][j], Menu(m.name, cb));
-                      od;
-                    Add(graphHasse, nodes[i][j]);
-                od;
+                    cb := Callback(m.func, knownArgs);
+                    Add(nodes[i][j], Menu(m.name, cb));
+                  od;
+                  if i = Length(cls) and j = len[i] then
+                    SetTitle(nodes[i][j], "G"); # set G
+                  fi;
+                  Add(graphHasse, nodes[i][j]);
+              od;
             od;
-        
             # uniform layers hack
             last:=rec(o:=0,n:=0);
             for i in [1..Length(cls)] do
-                for j in [1..len[i]] do
-                    if Layer(nodes[i][j]) <> last.o then
-                        last.o := Layer(nodes[i][j]);
-                        last.n := last.n - 2;
-                    fi;
-                    SetLayer(nodes[i][j], last.n);
-                od;
+              for j in [1..len[i]] do
+                if Layer(nodes[i][j]) <> last.o then
+                  last.o := Layer(nodes[i][j]);
+                  last.n := last.n - 2;
+                fi;
+                SetLayer(nodes[i][j], last.n);
+              od;
             od;
-        
+      
             max:=MaximalSubgroupsLattice(L);
             for i in [1..Length(cls)] do
-                for j in max[i] do
-                    rep:=ClassElementLattice(cls[i],1);
-                    for k in [1..len[i]] do
-                        if k=1 then
-                            z:=j[2];
-                        else
-                            t:=cls[i]!.normalizerTransversal[k];
-                            z:=ClassElementLattice(cls[j[1]],1); # force computation of transv.
-                            z:=cls[j[1]]!.normalizerTransversal[j[2]]*t;
-                            z:=PositionCanonical(cls[j[1]]!.normalizerTransversal,z);
-                        fi;
-                        Add(graphHasse, Link(nodes[i][k],nodes[j[1]][z]));
-                  od;
+              for j in max[i] do
+                rep:=ClassElementLattice(cls[i],1);
+                for k in [1..len[i]] do
+                  if k=1 then
+                    z:=j[2];
+                  else
+                     t:=cls[i]!.normalizerTransversal[k];
+                    z:=ClassElementLattice(cls[j[1]],1); # force computation of transv.
+                    z:=cls[j[1]]!.normalizerTransversal[j[2]]*t;
+                    z:=PositionCanonical(cls[j[1]]!.normalizerTransversal,z);
+                  fi;
+                  Add(graphHasse, Link(nodes[i][k],nodes[j[1]][z]));
                 od;
               od;
-            Add(poset, graphHasse);
-            
+            od;
             return Draw(poset);
         end, multiple := false, group := true ),
   #rec( name := "Centralizers", func := Centralizer ),

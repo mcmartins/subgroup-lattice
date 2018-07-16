@@ -77,12 +77,8 @@ function(G, def)
   cls:=ConjugacyClassesSubgroups(G);
 
   # create one or two initial vertices (G itself and trivial subgroup):
-  # we seperate the mathematical data and the graphical data:
-  vmath := rec(group := G, info := rec(Index := 1, IsNormal := true));
-  vmath.class := [vmath];
   v2 := Shape(ShapeType.DIAMOND, "G");
-  SetLayer(v2, 1);
-  SetId(v2, String(Representative(cls[Length(cls)])));
+  SetLayer(v2, -4);
   for m in latticeType.contextMenus do
     knownArgs := [poset, Representative(cls[Length(cls)])];
     if m.group = true then
@@ -94,21 +90,8 @@ function(G, def)
   Add(graph, v2);
 
   if latticeType.trivial then
-    vmath := rec(group := TrivialSubgroup(G));
-    if CanComputeSize(G) then
-      vmath.info := rec(Index := Size(G));
-    else
-      vmath.info := rec();
-    fi;
-    vmath.class := [vmath];
-    if CanComputeSize(G) and Size(G) <> infinity then
-      v1 := Shape(ShapeType.DIAMOND, "1");
-      SetLayer(v1, vmath.info.Index);
-    else
-      v1 := Shape(ShapeType.DIAMOND, "1");
-      SetLayer(v1, -1);
-    fi;
-    SetId(v1, String(Representative(cls[1])));
+    v1 := Shape(ShapeType.DIAMOND, "1");
+    SetLayer(v1, 0);
     for m in latticeType.contextMenus do
       knownArgs := [poset, Representative(cls[1])];
       if m.group = true then

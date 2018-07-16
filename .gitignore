@@ -50,3 +50,5 @@ src/*.lo
 
 .idea
 *.iml
+
+*.ipynb_checkpoints
