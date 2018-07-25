@@ -71,7 +71,8 @@ function(G, def)
   # create an undirected graph to represent the poset
   # by adding layers later, the undirected graph turns
   # into an Hasse diagram
-  graph := Graph(GraphType.DIRECTED);
+  LinkDefaults!.weight := 2;
+  graph := Graph(GraphType.UNDIRECTED);
   Add(poset, graph);
   
   cls:=ConjugacyClassesSubgroups(G);
@@ -107,7 +108,7 @@ function(G, def)
   fi;
 
   # <G> is selected at first
-  v2!.selected := true;
+  SetSelected(v2, true);
 
   # create menus:
   menu := Menu("Subgroup Lattice");
@@ -186,7 +187,7 @@ function(G)
     canCompare   := true, # we assume we can compare groups
     trivial      := true, # we want the trivial subgroup
     menus        := menus,
-    contextMenus := ContextMenusForFiniteGroups,
+    contextMenus := ContextMenuOpsForFiniteGroups,
   );
 end);
 
@@ -208,6 +209,6 @@ function(G)
     canCompare   := false, # we assume we can compare groups
     trivial      := false, # we want the trivial subgroup
     menus        := menus,
-    contextMenus := ContextMenusForFpGroups,
+    contextMenus := ContextMenuOpsForFpGroups,
   );
 end);

@@ -7,6 +7,8 @@
 
 last := 0;    # to make GAP happy when this package is auto-loaded
 
+#ReadPackage( "subgrouplattice", "gap/ilatgrp.gd" );
+#ReadPackage( "subgrouplattice", "gap/ilatgrp.gi" );
 ReadPackage( "subgrouplattice", "gap/menus.gi" );
 ReadPackage( "subgrouplattice", "gap/subgroup.gd" );
 ReadPackage( "subgrouplattice", "gap/subgroup.gi" );

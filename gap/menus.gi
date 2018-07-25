@@ -1,20 +1,19 @@
 BindGlobal( "MenuOpsForFiniteGroups",
 [ rec( name := "All Subgroups",
        func := function(poset, G)
-            local L, cls, len, sz, graphHasse, max, rep, z, t, i, j, k, nodes, last, knownArgs, m, cb;
+            local L, cls, len, sz, graphHasse, max, rep, z, t, i, j, k, nodes, last, knownArgs, m, cb, link;
 
             L:=LatticeSubgroups(G);;
             cls:=ConjugacyClassesSubgroups(L);
-            len:=[];
-            sz:=[];
+            len:=[]; sz:=[];
             for i in cls do
               Add(len,Size(i));
               AddSet(sz,Size(Representative(i)));
             od;
-            
+
             graphHasse := poset!.graph;
-            graphHasse!.nodes := rec(); # initialize nodes
-            graphHasse!.links := rec(); # initialize links
+            UnsetNodes(graphHasse); # initialize nodes
+            UnsetLinks(graphHasse); # initialize links
 
             nodes := [];
             sz:=Reversed(sz);
@@ -40,9 +39,11 @@ BindGlobal( "MenuOpsForFiniteGroups",
                 if i = Length(cls) and j = len[i] then
                   SetTitle(nodes[i][j], "G"); # set G
                 fi;
+                SetConjugateId(nodes[i][j], i);
                 Add(graphHasse, nodes[i][j]);
               od;
             od;
+
             # uniform layers hack
             last:=rec(o:=0,n:=0);
             for i in [1..Length(cls)] do
@@ -54,7 +55,7 @@ BindGlobal( "MenuOpsForFiniteGroups",
                 SetLayer(nodes[i][j], last.n);
               od;
             od;
-      
+
             max:=MaximalSubgroupsLattice(L);
             for i in [1..Length(cls)] do
               for j in max[i] do
@@ -87,7 +88,7 @@ BindGlobal( "MenuOpsForFiniteGroups",
   #rec( name := "Sylow Subgroups", func := GGLSylowSubgroup ),
 ] );
 
-BindGlobal( "MenuOpsCommon", 
+BindGlobal( "MenuOpsCommon",
 [ #rec( name := "DerivedSubgroups", func := DerivedSubgroup ),
   #rec( name := "Cores", func := Core ),
   #rec( name := "Closure", func := GGLClosureGroup ),
@@ -109,15 +110,15 @@ BindGlobal( "MenuOpsForFpGroups",
   #rec( name := "Test Conjugacy", func := GGLTestConjugacy )
 ] );
 
-BindGlobal( "ContextMenusForFiniteGroups",
-  [ rec( name := "Size", 
+BindGlobal( "ContextMenuOpsForFiniteGroups",
+  [ rec( name := "Size",
          func := function(poset, n)
               local message;
               message := FrancyMessage(FrancyMessageType.INFO, "Size",  String(Size(n)));
               Add(poset, message);
               return Draw(poset);
          end, group := false ),
-    #rec( name := "Index", 
+    #rec( name := "Index",
     #     func := function(poset, n)
     #          local message;
     #          message := FrancyMessage(FrancyMessageType.INFO, "Index",  String(Index(n)));
@@ -189,7 +190,7 @@ BindGlobal( "ContextMenusForFiniteGroups",
          end, group := false ),
   ] );
 
-BindGlobal( "ContextMenusForFpGroups",
+BindGlobal( "ContextMenuOpsForFpGroups",
   [ rec( name := "Index", func := Index ),
     rec( name := "IsNormal", func := IsNormal ),
     rec( name := "IsFpGroup", func := IsFpGroup ),
@@ -197,7 +198,7 @@ BindGlobal( "ContextMenusForFpGroups",
     rec( name := "Abelian Invariants", func := AbelianInvariants ),
     rec( name := "CosetTable", func := CosetTableInWholeGroup ),
     rec( name := "IsomorphismFpGroup", func := IsomorphismFpGroup ),
-    rec( name := "FactorGroup", 
+    rec( name := "FactorGroup",
          func := function(G, N);
           if IsNormal(G, N) then
             return FactorGroup(G, N);

@@ -1,17 +1,17 @@
 #############################################################################
-##  
-##  PackageInfo.g for the GAP SubgroupLattice
+##
+##  PackageInfo.g for the GAP FrancySubgroupLattice
 ##
 
 SetPackageInfo( rec(
 
 PackageName := "SubgroupLattice",
-Subtitle    := "Subgroup Lattice using Francy.s",
+Subtitle    := "Subgroup Lattice using Francy",
 Version     := "0.1.0",
 Date        := "10/07/2018",
 
 Persons := [
-  rec( 
+  rec(
     LastName      := "Martins",
     FirstNames    := "Manuel",
     IsAuthor      := true,
@@ -47,7 +47,7 @@ ArchiveURL      := Concatenation( ~.SourceRepository.URL,
                                  "/subgroup-lattice-", ~.Version ),
 ArchiveFormats := ".tar.gz",
 
-AbstractHTML := 
+AbstractHTML :=
   "The <span class=\"pkgname\">SubgroupLattice</span> package provides an interface to interact with groups by displaying lattices.",
 
 PackageDoc := rec(
@@ -61,7 +61,7 @@ PackageDoc := rec(
 
 Dependencies := rec(
   GAP := ">=4.7",
-  NeededOtherPackages := [ [ "francy", ">= 0.5.6" ] ],
+  NeededOtherPackages := [ [ "francy", ">= 0.8.10" ] ],
   SuggestedOtherPackages := [],
   ExternalConditions := []
 ),

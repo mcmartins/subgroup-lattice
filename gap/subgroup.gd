@@ -1,4 +1,3 @@
-
 DeclareCategory( "IsGraphicSubgroupLattice", IsFrancyObject );
 
 #############################################################################
@@ -37,7 +36,6 @@ if not IsBound(GraphicSubgroupLattice) then
   DeclareOperation( "GraphicSubgroupLattice", [ IsGroup ] );
   DeclareOperation( "GraphicSubgroupLattice", [ IsGroup, IsRecord ] );
 fi;
-
 
 #############################################################################
 ##
